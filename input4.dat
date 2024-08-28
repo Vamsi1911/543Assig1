@@ -1,0 +1,10 @@
+k1 0.15
+k2 0.038
+k3 0.1
+T_L 600
+T_R 400
+N1 10
+N2 100
+N3 20
+Tolerance 1e-6
+MaxIterations 100000

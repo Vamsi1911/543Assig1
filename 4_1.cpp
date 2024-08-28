@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <cmath>    // For fabs
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -8,7 +8,7 @@
 using namespace std;
 
 // Function to read parameters from input file
-void read_parameters(const string& filename, double& L, double& k, double& Q, double& T_L, double& T_R, int& N, double& TOLERANCE, int& MAX_ITERATIONS) {
+void read_parameters(const string& filename, double& k1, double& k2, double& k3, double& T_L, double& T_R, int& N1, int& N2, int& N3, double& TOLERANCE, int& MAX_ITERATIONS) {
     ifstream inputFile(filename);
     if (!inputFile) {
         cerr << "Error opening " << filename << " file!" << endl;
@@ -21,12 +21,14 @@ void read_parameters(const string& filename, double& L, double& k, double& Q, do
         string key;
         ss >> key;
         
-        if (key == "L") ss >> L;
-        else if (key == "k") ss >> k;
-        else if (key == "Q") ss >> Q;
+        if (key == "k1") ss >> k1;
+        else if (key == "k2") ss >> k2;
+        else if (key == "k3") ss >> k3;
         else if (key == "T_L") ss >> T_L;
         else if (key == "T_R") ss >> T_R;
-        else if (key == "N") ss >> N;
+        else if (key == "N1") ss >> N1;
+        else if (key == "N2") ss >> N2;
+        else if (key == "N3") ss >> N3;
         else if (key == "Tolerance") ss >> TOLERANCE;
         else if (key == "MaxIterations") ss >> MAX_ITERATIONS;
     }
@@ -36,14 +38,14 @@ void read_parameters(const string& filename, double& L, double& k, double& Q, do
 
 int main() {
     // Variables to hold input values
-    double L, k, Q, T_L, T_R, TOLERANCE;
-    int N, MAX_ITERATIONS;
+    double k1, k2, k3, T_L, T_R, TOLERANCE;
+    int N1, N2, N3, MAX_ITERATIONS;
 
     // Read parameters from input file
-    read_parameters("input3.dat", L, k, Q, T_L, T_R, N, TOLERANCE, MAX_ITERATIONS);
+    read_parameters("input4.dat", k1, k2, k3, T_L, T_R, N1, N2, N3, TOLERANCE, MAX_ITERATIONS);
 
-    // Step size
-    double dx = L / N;
+    // Total number of divisions
+    int N = N1 + N2 + N3;
 
     // Initialize temperature values
     vector<double> T(N + 1, 0);
@@ -66,11 +68,23 @@ int main() {
 
         max_change = 0.0; // Reset max_change for this iteration
 
-        // Update temperatures using finite difference
+        // Update temperatures in Plasterboard
+        for (int i = 1; i < N1; ++i) {
+            T_new[i] = 0.5 * (T[i - 1] + T[i + 1]);
+        }
+
+        // Update temperatures in Fiberglass
+        for (int i = N1; i < N1 + N2; ++i) {
+            T_new[i] = 0.5 * (T[i - 1] + T[i + 1]);
+        }
+
+        // Update temperatures in Plywood
+        for (int i = N1 + N2; i < N; ++i) {
+            T_new[i] = 0.5 * (T[i - 1] + T[i + 1]);
+        }
+
+        // Track the maximum change for convergence
         for (int i = 1; i < N; ++i) {
-            T_new[i] = 0.5 * (T[i - 1] + T[i + 1]) + (dx * dx * Q) / (2 * k);
-            
-            // Track the maximum change for convergence
             double change = fabs(T_new[i] - T[i]);
             if (change > max_change) {
                 max_change = change;
@@ -94,8 +108,8 @@ int main() {
     // Print the final temperature distribution
     cout << "Temperature distribution:" << endl;
     for (int i = 0; i <= N; ++i) {
-        double x = i * dx;
-        cout << "Position: " << x << " meters, Temperature: " << T[i] << " °C" << endl;
+        double x = i; // You can adjust this for actual position
+        cout << "Position: " << x << " mm, Temperature: " << T[i] << " K" << endl;
     }
 
     return 0;

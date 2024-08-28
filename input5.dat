@@ -1,0 +1,10 @@
+GridSize 100
+BetaPositive 0.001
+BetaNegative -0.001
+Tolerance 1e-6
+MaxIterations 10000
+LeftTemp 100
+RightTemp 500
+RodLength 0.5
+k0 0.1
+

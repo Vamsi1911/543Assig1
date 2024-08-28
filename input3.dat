@@ -1,0 +1,8 @@
+L 0.02
+k 0.5
+Q 1000000
+T_L 100
+T_R 200
+N 10
+Tolerance 1e-6
+MaxIterations 10000

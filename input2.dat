@@ -1,0 +1,8 @@
+L 0.1
+k 0.1
+q_flux 200
+h 25
+T_f 300
+T_r 50
+N 10
+Tolerance 1e-6

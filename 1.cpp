@@ -1,17 +1,45 @@
 #include <iostream>
 #include <vector>
 #include <cmath>    // For fabs
+#include <fstream>
+#include <sstream>
+#include <string>
+
 using namespace std;
 
-// Constants
-const int MAX_ITERATIONS = 10000;
-const double TOLERANCE = 1e-6;
-const double L = 0.5;  // Length of the rod (meters)
-const int N = 10;      // Number of divisions (N+1 points)
-const double T0 = 100; // Temperature at the left end (x=0)
-const double T1 = 500; // Temperature at the right end (x=L)
+// Function to read parameters from the input file
+void read_parameters(const string& filename, double& L, int& N, double& T0, double& T1, double& TOLERANCE, int& MAX_ITERATIONS) {
+    ifstream inputFile(filename);
+    if (!inputFile) {
+        cerr << "Error opening " << filename << " file!" << endl;
+        exit(1);
+    }
+
+    string line;
+    while (getline(inputFile, line)) {
+        stringstream ss(line);
+        string key;
+        ss >> key;
+        
+        if (key == "L") ss >> L;
+        else if (key == "N") ss >> N;
+        else if (key == "T0") ss >> T0;
+        else if (key == "T1") ss >> T1;
+        else if (key == "TOLERANCE") ss >> TOLERANCE;
+        else if (key == "MAX_ITERATIONS") ss >> MAX_ITERATIONS;
+    }
+
+    inputFile.close();
+}
 
 int main() {
+    // Variables to hold input values
+    double L, T0, T1, TOLERANCE;
+    int N, MAX_ITERATIONS;
+
+    // Read parameters from input file
+    read_parameters("input1.dat", L, N, T0, T1, TOLERANCE, MAX_ITERATIONS);
+
     // Step size
     double dx = L / N;
 

@@ -1,20 +1,47 @@
 #include <iostream>
 #include <vector>
 #include <cmath>    // For fabs
+#include <fstream>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
-// Constants
-const double L = 0.1;            // Thickness of the wall (in meters)
-const double k = 0.1;            // Thermal conductivity (W/m-K)
-const double q_flux = 200;       // Heat flux at left face (W/m^2)
-const double h = 25;             // Heat transfer coefficient (W/m^2-K)
-const double T_f = 300;          // Temperature of the hot fluid (°C)
-const double T_r = 50;           // Temperature at the right face (°C)
-const int N = 20;                // Number of divisions in the wall
-const double TOLERANCE = 1e-6;   // Convergence tolerance
+// Function to read parameters from input file
+void read_parameters(const string& filename, double& L, double& k, double& q_flux, double& h, double& T_f, double& T_r, int& N, double& TOLERANCE) {
+    ifstream inputFile(filename);
+    if (!inputFile) {
+        cerr << "Error opening " << filename << " file!" << endl;
+        exit(1);
+    }
+
+    string line;
+    while (getline(inputFile, line)) {
+        stringstream ss(line);
+        string key;
+        ss >> key;
+        
+        if (key == "L") ss >> L;
+        else if (key == "k") ss >> k;
+        else if (key == "q_flux") ss >> q_flux;
+        else if (key == "h") ss >> h;
+        else if (key == "T_f") ss >> T_f;
+        else if (key == "T_r") ss >> T_r;
+        else if (key == "N") ss >> N;
+        else if (key == "Tolerance") ss >> TOLERANCE;
+    }
+
+    inputFile.close();
+}
 
 int main() {
+    // Variables to hold input values
+    double L, k, q_flux, h, T_f, T_r, TOLERANCE;
+    int N;
+
+    // Read parameters from input file
+    read_parameters("input2.dat", L, k, q_flux, h, T_f, T_r, N, TOLERANCE);
+
     // Step size
     double dx = L / N;
 
@@ -24,21 +51,18 @@ int main() {
     // Set boundary condition at the right face (x = L)
     T[N] = T_r;
 
-    // Initial guess for the temperature at the left face (x = 0)
-    double T0 = T_f; // Initial guess close to the hot fluid temperature
-
-    int iteration = 0;
-    double max_change = 0.0;
-
     // Perform iterations to solve the system
-    for (iteration = 0; iteration < 100000; ++iteration) {
+    int iteration = 0;
+    double max_change = TOLERANCE + 1;
+
+    while (max_change >= TOLERANCE && iteration < 100000) {
         // Copy the current temperature values
         vector<double> T_new = T;
 
         // Apply boundary condition at the left face (x = 0)
-        double heat_flux_conduction = -k * (T[1] - T0) / dx;
-        double heat_flux_total = q_flux + h * (T_f - T0);  
-        T_new[0] = T0 + (heat_flux_total - heat_flux_conduction) / h;
+        double heat_flux_conduction = -k * (T[1] - T[0]) / dx;
+        double heat_flux_total = q_flux + h * (T_f - T[0]);
+        T_new[0] = T[0] + (heat_flux_total - heat_flux_conduction) / h;
 
         // Update the temperature at each interior point using finite difference
         max_change = 0.0; // Reset max_change for this iteration
@@ -57,14 +81,13 @@ int main() {
         T = T_new;
 
         // Check for convergence
-        if (max_change < TOLERANCE) {
-            cout << "Converged after " << iteration + 1 << " iterations." << endl;
-            break;
-        }
+        iteration++;
     }
 
     if (max_change >= TOLERANCE) {
         cout << "Did not converge after " << iteration << " iterations." << endl;
+    } else {
+        cout << "Converged after " << iteration << " iterations." << endl;
     }
 
     // Print the final temperature distribution
