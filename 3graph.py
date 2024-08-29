@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Parameters (replace these with actual values or read from file)
+# Parameters
 L = 0.02  # Thickness of the plate in meters
 k = 0.5   # Thermal conductivity in W/m-K
 Q = 1000 * 1e3  # Heat generation in W/m³ (converted from kW/m³)
@@ -78,4 +78,9 @@ plt.ylabel('Temperature (°C)')
 plt.title('Temperature Distribution in the Plate')
 plt.legend()
 plt.grid(True)
+
+# Save the plot as a PNG file
+plt.savefig('3_temperature_distribution_plate.png')
+
+# Display the plot
 plt.show()
